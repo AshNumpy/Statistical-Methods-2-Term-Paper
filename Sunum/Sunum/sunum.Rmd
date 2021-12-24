@@ -1,0 +1,296 @@
+---
+title: "İstatistiksel Yöntemler 2 Ödevi"
+author: "Ramazan Erduran - 21821809"
+date: "23 12 2021"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Tek Yönlü ANOVA:
+Verileri içeri aktarma.
+```{r}
+library(readxl)
+crop_data <- read_excel("C:/Users/lenovo/Documents/GitHub/StatMeth2/Statistical-Methods-2/One_way_ANOVA/one_way_data.xlsx")
+head(crop_data,3)
+```
+
+### Normallik testi:
+H0: Verilerin dağılımı ile normal dağılım arasında fark yoktur.  
+Hs: Verilerin dağılımı ile normal dağılım arasında fark vardır.  
+```{r}
+shapiro.test(crop_data$yield)
+```
+%95 güven düzeyinde H0 reddedilemez. Verilerin dağılımı ile normal dağılım arasında fark yoktur.
+
+### Varyans homojenliği:
+H0: $\sigma$~1~ = $\sigma$~2~  
+Hs: $\sigma$~1~ $\neq$ $\sigma$~2~  
+```{r}
+bartlett.test(yield~fertilizer,data=crop_data)
+```
+%95 güven düzeyinde H0 reddedilemez. Varyanslar homojendir.
+
+### ANOVA hesabı:
+H0: Gübreler arasında fark yoktur.  
+Hs: Gübreler arasında fark vardır.
+```{r}
+crop_data$fertilizer <- as.factor(crop_data$fertilizer)
+rez_aov=lm( crop_data$yield ~ crop_data$fertilizer) 
+anova(aov(rez_aov))
+```
+%95 güven düzeyinde söylenebilir ki gübreler arası farklılık vardır.
+
+### Post-Hoc testi:
+```{r}
+ANOVA=aov(rez_aov)
+# Tukey test to study each pair of treatment :
+TukeyHSD(x=ANOVA, 'crop_data$fertilizer', conf.level=0.95)
+```
+2 ile 1 ..... fark anlamlı değil  
+3 ile 1 ..... fark anlamlı  
+3 ile 2 ..... fark anlamlı
+
+### Özetleyici istatistikler:
+```{r}
+library(dplyr)
+summary(crop_data[crop_data$fertilizer==1,])
+summary(crop_data[crop_data$fertilizer==2,])
+summary(crop_data[crop_data$fertilizer==3,])
+```
+Post Hoc testlerinden yararlanılarak %95 güvenle söylenebilir ki 3 numaralı gübre en iyisidir.
+
+
+
+
+
+
+## Tekrarlı Ölçümlü ANOVA:
+Verileri içeri aktarma.
+```{r}
+library(haven)
+library(tidyverse)
+library(ggpubr)
+library(rstatix)
+rept_data <- read_sav("~/GitHub/StatMeth2/Statistical-Methods-2/Repetitive_ANOVA/repeated_measures.sav")
+head(rept_data,5)
+```
+### Verileri manipüle etme:
+```{r}
+rept_data[,5] <- list(seq(1,30,1))
+colnames(rept_data) <- c("TIME1","TIME2","TIME3","TIME4","id")
+
+rp_factor <- rept_data %>%
+  gather(key = "time", value = "score", TIME1, TIME2, TIME3, TIME4) %>%
+  convert_as_factor(id,time)
+  
+head(rp_factor, 3)
+```
+### Ortalama ve St. Sapma değerleri:
+```{r}
+rp_factor%>%
+  group_by(time) %>%
+  get_summary_stats(score, type = "mean_sd")
+```
+### Extreme Aykırı değer kontrolü:
+```{r}
+rp_factor %>%
+  group_by(time) %>%
+  identify_outliers(score)
+```
+"EXTREME" bir aykırı değer yok.
+
+### Normallik testi:
+H0: Verilerin dağılımı ile normal dağılım arasında fark yoktur.  
+Hs: Verilerin dağılımı ile normal dağılım arasında fark vardır.  
+```{r}
+rp_factor %>%
+  group_by(time) %>%
+  shapiro_test(score)
+```
+Tüm değişkenler adına p>0.05 için H0 reddedilemez. Hepsi normal dağılıyor denebilir.
+
+### Varyans homojenliği:
+H0: $\sigma$~1~ = $\sigma$~2~ = $\sigma$~3~ = $\sigma$~4~   
+Hs: En az bir $\sigma$~i~ farklıdır.  
+```{r}
+bartlett.test(score~time,data=rp_factor)
+```
+Test sonucuna göre p > 0.05 için söylenebilir ki varyanslar homojendir.
+
+### ANOVA testi:
+H0: Zamanlar arası fark yoktur.  
+Hs: En az bir zamana ait değerler farklıdır.  
+```{r}
+rp_factor$time <- as.factor(rp_factor$time)
+rez_aov=lm( rp_factor$score ~ rp_factor$time) 
+anova(aov(rez_aov))
+```
+[(F~h~=0.878) < (F~t~=3,15)] aynı zamanda P~value~=0.4543 > alpha=0.05 için;  
+H0 hipotezi reddedilemez. Yani zamanlar arasında farklılık yoktur.
+
+
+
+
+
+
+
+
+
+
+
+## Rastgele Blok:
+verileri içeri aktarma
+```{r}
+library(readxl)
+cb_data<- read_excel("~/GitHub/StatMeth2/Statistical-Methods-2/Randomized_Block_ANOVA/castle_bakery_data.xlsx")
+colnames(cb_data) <- c("Heights","Display_regular","Display_wide")
+head(cb_data)
+```
+
+### Normallik testi:
+H0: Verilerin dağılımı ile normal dağılım arasında fark yoktur.  
+Hs: Verileirn dağılımı ile normal dağılım arasında fark vardır.
+```{r}
+shapiro.test(cb_data$Display_regular)
+shapiro.test(cb_data$Display_wide)
+```
+%95 güven düzeyinde, bütün oynatma türü verileri normal dağılıyor denebilir. 
+
+### Verileri manipüle etme:
+```{r}
+cb_data <- cb_data %>%
+  gather(key = "kind", value = "value", Display_regular, Display_wide) %>%
+  convert_as_factor(Heights,kind)
+```
+
+### Varyans homojenliği:
+H0: $\sigma$~Bottom~ = $\sigma$~Middle~ = $\sigma$~Top~  
+Hs: En az bir $\sigma$~i~ farklıdır. 
+```{r}
+bartlett.test(value ~ Heights, data=cb_data)
+```
+P-value > 0.05 için H0 reddedilemez. Bu nedenle söylenebilir ki varyanslar homojendir.
+
+### ANOVA testi:
+H0: Plakların oynatma yerleri arasında fark yoktur.  
+Hs: Plakların oynatma yerleri arasında fark vardır.
+```{r}
+fit <- aov(value ~ Heights + kind, data = cb_data)
+summary(fit)
+```
+P < 0.05 için H0 reddedilir. Yani oynatma yerleri arasında farklılık vardır.
+
+### Post Hoc testi:
+```{r}
+TukeyHSD(fit ,conf.level=0.95)
+```
+Middle ile Bottom ..... fark anlamlı.  
+Top ile Bottom    ..... fark anlamlı değil.  
+Top ile Middle    ..... fark anlamlı  
+Tukey testinin sonucuna göre söylenebilir ki "Middle" seviyesindeki oynatma en iyisidir.
+
+
+
+
+
+## Latin Kare:
+Verileri içeri aktarma:
+```{r}
+library(readxl)
+data = read_excel(path = "C:/Users/lenovo/Documents/GitHub/StatMeth2/Statistical-Methods-2/Latin_Square/data_ls.xlsx",
+                col_names = TRUE)
+
+head(data,5)
+#Veri yapısına bakılıp satır sütun görselleştirmesi yapıldığında:  
+#---1-2-3-4-  
+#-1-B-D-C-A-  
+#-2-C-A-D-B-  
+#-3-A-C-B-D-  
+#-4-D-B-A-C-  
+#Şeklindeki latin kare veri setimiz ortaya çıkmaktadır.
+```
+
+### Veriyi manipüle etme:
+```{r}
+data$Row <- as.factor(data$Row)
+data$Column <- as.factor(data$Column)
+data$Varieties <- as.factor(data$Varieties)
+str(data)
+```
+
+### ANOVA testi:
+```{r}
+attach(data)
+model <- lm(Yield ~ Row+Column+Varieties)
+anova(model)
+```
+P değerlerine göre %95 güven düzeyinde;  
+Satırlar arası farklılık yoktur.  
+Sütunlar arası farklılık vardır.  
+Çeşitler arası farklılık vardır yorumları yapılabilir.
+
+### Ortalama karşılaştırma testi:
+```{r}
+library(agricolae)
+# LSD test
+LSD.test(y = model,trt = "Varieties",DFerror = model$df.residual,MSerror = deviance(model)/model$df.residual,alpha = 0.05,group = TRUE,console = TRUE)
+
+# SNK test
+SNK.test(y = Yield,trt = Varieties,DFerror = model$df.residual,MSerror = deviance(model)/model$df.residual,alpha = 0.05,group = TRUE,console = TRUE)
+```
+SNK ve LSD test sonuçlarına göre söylenebilir A çeşidi en iyisidir.
+
+
+
+
+
+## Çok Etkenli Deney Düzeni:
+Verileri içeri aktarma.
+```{r}
+library(readr)
+library(dplyr)
+lab_data <- read_table("~/GitHub/StatMeth2/Statistical-Methods-2/Multifactor_Setup/JAHANMI2.DAT.txt",col_types = cols(Lab = col_factor(levels = c("1","2", "3", "4", "5", "6", "7", "8"))))
+
+head(lab_data)
+```
+
+### Verileri manipüle etme:
+Daha anlaşılabilir ve daha kolay işlenebilir hale getirmek için üzerinde inceleme yapacağımız değişkenleri ayırdık.
+```{r}
+lab_edited <- lab_data %>%
+  summarize(Lab=Lab, X3=X3, Y=Y)
+head(lab_edited,5)
+```
+
+### ANOVA testi:
+```{r}
+res_1<- lm(Y ~ Lab*as.factor(X3), data=lab_edited)
+anova(res_1)
+```
+%95 Güven düzeyinde etkileşimler önemlidir.  
+%95 Güven düzeyinde lab etkeni önemsizdir.  
+%95 Güven düzeyinde X3 etkeni önemsizdir yorumları yapılabilir.
+
+### Etkileşim grafikleri:
+```{r}
+attach(lab_edited)
+interaction.plot(Lab, X3, Y, type = "l",
+xlab = "Lab",trace.label = "X3",
+ylab = "Y", col=c(2,3,4))
+```
+
+
+
+
+
+
+## Kaynakça:
+Tek Yönlü Anova Kaynağı: [Scribbr](https://www.scribbr.com)  
+Tekrarlı Ölçümlü anova Kaynağı: [Google Drive](https://drive.google.com/file/d/0B0BsVnmXOaHwdzVYd05ZWjROQjg/view?resourcekey=0-yaqC7XcttKTgjEENapzhVg)  
+Rastgele Blok Kaynağı: [National Institute of Standarts and Technology](https://www.nist.gov)  
+Latin Kare Kaynağı: [Agron Info Tech](https://agroninfotech.blogspot.com)  
+Çok Etkenli Deney Düzeni Kaynağı: [Information Technology Laboratory](https://www.nist.gov/itl)  
