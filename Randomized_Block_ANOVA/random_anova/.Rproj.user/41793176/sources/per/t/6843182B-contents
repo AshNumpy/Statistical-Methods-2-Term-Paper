@@ -1,0 +1,18 @@
+#--------------
+# Veirleri içeri aktarma
+#--------------
+library(readxl)
+cb_data<- read_excel("~/GitHub/StatMeth2/Statistical-Methods-2/Randomized_Block_ANOVA/castle_bakery_data.xlsx")
+colnames(cb_data) <- c("Heights","Display_regular","Display_wide")
+#----------------
+# Normallik testi
+#----------------
+shapiro.test(cb_data$Display_regular)
+shapiro.test(cb_data$Display_wide)
+
+#--------------------
+# Varyans homojenliği
+#--------------------
+cb_data$Display_regular <- as.factor(cb_data$Display_regular)
+cb_data$Display_wide <- as.factor(cb_data$Display_wide)
+bartlett.test(cb_data$Display_regular~cb_data$Heights, data=cb_data)

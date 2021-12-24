@@ -1,0 +1,2 @@
+https://www.itl.nist.gov/div898/education/datasets.htm#anova
+Source: Neter, Kutner, Nachtsheim, Wasserman; pp 817			
