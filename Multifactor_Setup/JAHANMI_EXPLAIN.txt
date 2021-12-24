@@ -1,0 +1,26 @@
+This is Dataplot data file     JAHANMI2.DAT
+Effect of Machining Factors on Strength of Ceramics
+(Longitudinal Data Only)
+Response variable                  = ceramic strength
+Number of observations             =  480
+Number of variables per line image =   15
+Order of variables on a line image--
+   1. Factor  1 = Observation Id (1 to 960)
+   2. Factor  2 = Lab (8 levels: 1 to 8)
+   3. Factor  3 = Bar id within lab (1 to 30)
+   4. Factor  4 = Set xxx (4 levels: 1 to 4)
+   5. Response Variable Y = Strength of Ceramic
+   6. Factor  5 = Table Speed    (2 levels: slow and fast)
+   7. Factor  6 = Down Feed Rate (2 levels: slow & fast)
+   8. Factor  7 = Wheel Grit     (2 levels:     )
+   9. Factor  8 = Direction      (1 level : longitudinal only)
+  10. Factor  9 = Treatment      (2**4 = 16 levels: 1 to 16)
+  11. Factor 10 = Set of 15 within lab (2 levels: 1 and 2)
+  12. Factor 11 = Rep (2 levels: 1 and 2)
+  13. Factor 12 = Coded Lab (for SAS plotting purposes)
+  14. Factor 13 = Bar Batch (2 levels: 1 and 2)
+  15. Factor 14 = ..
+  16. Factor 15 = distinct set of 15 reps (32 levels: 1 to 32)
+To read this file into Dataplot--
+    SKIP 50
+    READ JAHANMI2.DAT   RUN LAB BAR SET Y X1 TO X10 SET2
