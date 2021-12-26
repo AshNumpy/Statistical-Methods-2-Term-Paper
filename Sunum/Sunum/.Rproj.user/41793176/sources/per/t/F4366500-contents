@@ -63,6 +63,11 @@ summary(crop_data[crop_data$fertilizer==3,])
 ```
 Post Hoc testlerinden yararlanılarak %95 güvenle söylenebilir ki 3 numaralı gübre en iyisidir.
 
+
+
+
+
+
 ## Tekrarlı Ölçümlü ANOVA:
 Verileri içeri aktarma.
 ```{r}
@@ -127,6 +132,16 @@ anova(aov(rez_aov))
 [(F~h~=0.878) < (F~t~=3,15)] aynı zamanda P~value~=0.4543 > alpha=0.05 için;  
 H0 hipotezi reddedilemez. Yani zamanlar arasında farklılık yoktur.
 
+
+
+
+
+
+
+
+
+
+
 ## Rastgele Blok:
 verileri içeri aktarma
 ```{r}
@@ -178,6 +193,10 @@ Top ile Bottom    ..... fark anlamlı değil.
 Top ile Middle    ..... fark anlamlı  
 Tukey testinin sonucuna göre söylenebilir ki "Middle" seviyesindeki oynatma en iyisidir.
 
+
+
+
+
 ## Latin Kare:
 Verileri içeri aktarma:
 ```{r}
@@ -225,6 +244,10 @@ SNK.test(y = Yield,trt = Varieties,DFerror = model$df.residual,MSerror = devianc
 ```
 SNK ve LSD test sonuçlarına göre söylenebilir A çeşidi en iyisidir.
 
+
+
+
+
 ## Çok Etkenli Deney Düzeni:
 Verileri içeri aktarma.
 ```{r}
@@ -259,6 +282,11 @@ interaction.plot(Lab, X3, Y, type = "l",
 xlab = "Lab",trace.label = "X3",
 ylab = "Y", col=c(2,3,4))
 ```
+
+
+
+
+
 
 ## Kaynakça:
 Tek Yönlü Anova Kaynağı: [Scribbr](https://www.scribbr.com)  

@@ -1,0 +1,3 @@
+data <- dataset_ex[sample(nrow(dataset_ex),100),]
+library(writexl)
+write.csv(data, "C:\\Users\\lenovo\\Desktop\\Hworks\\ist_yazılım\\final\\sample.csv")
